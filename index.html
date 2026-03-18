@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Delany Products Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f0f4f8;min-height:100vh;display:grid;place-items:center}
+.card{background:#fff;border-radius:14px;padding:2.5rem;width:100%;max-width:400px;border:1px solid #dde3ec;box-shadow:0 2px 12px rgba(0,0,0,0.06)}
+.icon{width:52px;height:52px;background:#0a1f3c;border-radius:10px;display:grid;place-items:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 14px}
+h2{text-align:center;font-size:20px;color:#0a1f3c;margin-bottom:6px}
+p{text-align:center;font-size:13px;color:#64748b;margin-bottom:24px}
+.err{background:#fff1f1;border:1px solid #fca5a5;color:#dc2626;border-radius:7px;padding:9px 13px;font-size:13px;margin-bottom:14px;display:none}
+label{display:block;font-size:12px;font-weight:500;color:#475569;margin-bottom:5px;margin-top:12px}
+input{width:100%;padding:10px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:14px;font-family:inherit}
+input:focus{outline:none;border-color:#2e7bcc}
+button{width:100%;padding:12px;background:#0a1f3c;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;margin-top:20px;font-family:inherit}
+button:hover{background:#1e3a5f}
+.note{text-align:center;font-size:12px;color:#94a3b8;margin-top:14px}
+/* portal */
+#portal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:#f0f4f8;overflow-y:auto}
+.nav{background:#0a1f3c;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.nlogo{color:#fff;font-size:15px;font-weight:600}
+.nright{display:flex;align-items:center;gap:12px}
+.nuser{color:#7aaad4;font-size:13px}
+.nbtn{border:1px solid rgba(255,255,255,0.2);background:transparent;color:#7aaad4;padding:5px 12px;border-radius:5px;cursor:pointer;font-size:12px;width:auto;margin-top:0}
+.welcome{max-width:800px;margin:40px auto;padding:0 20px}
+.wcard{background:#fff;border-radius:12px;border:1px solid #e8edf3;padding:2rem}
+.wt{font-size:20px;font-weight:600;color:#0a1f3c;margin-bottom:8px}
+.ws{font-size:13px;color:#64748b;margin-bottom:20px}
+.qbtns{display:flex;gap:10px;flex-wrap:wrap}
+.qb{padding:10px 20px;border:none;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;width:auto;margin-top:0}
+.qb1{background:#0a1f3c;color:#fff}
+.qb2{background:#059669;color:#fff}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-box" class="card">
+  <div class="icon">D</div>
+  <h2>Customer Portal</h2>
+  <p>Delany Products — Sign in to view your pricing and place orders</p>
+  <div class="err" id="err">Incorrect email or password. Please try again.</div>
+  <label>Email Address</label>
+  <input type="email" id="em" placeholder="you@company.com" />
+  <label>Password</label>
+  <input type="password" id="pw" placeholder="your password" />
+  <button onclick="doLogin()">Sign In</button>
+  <div class="note">Need an account? Contact orders@delanyproducts.com</div>
+</div>
+
+<!-- PORTAL -->
+<div id="portal">
+  <div class="nav">
+    <div class="nlogo">D &nbsp; Delany Products Portal</div>
+    <div class="nright">
+      <span class="nuser" id="uname"></span>
+      <button class="nbtn" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+  <div class="welcome">
+    <div class="wcard">
+      <div class="wt" id="wtitle">Welcome!</div>
+      <div class="ws" id="wdisc"></div>
+      <div class="qbtns">
+        <button class="qb qb1" onclick="alert('Full product catalog coming — 579 products!')">Browse Catalog (579 products)</button>
+        <button class="qb qb2" onclick="alert('Order history coming soon!')">My Orders</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+var users = [
+  {email:"admin@delanyproducts.com", pass:"admin2024", name:"Delany Admin", tier:"Admin", disc:"Full access"},
+  {email:"abc@abcplumbing.com", pass:"abc123", name:"ABC Plumbing Supply", tier:"Tier A", disc:"35% off list price"},
+  {email:"orders@metrocommercial.com", pass:"metro456", name:"Metro Commercial", tier:"Tier B", disc:"25% off list price"},
+  {email:"purchasing@citycontractors.com", pass:"city789", name:"City Contractors Inc", tier:"Tier C", disc:"15% off list price"}
+];
+
+function doLogin() {
+  var e = document.getElementById("em").value.trim().toLowerCase();
+  var p = document.getElementById("pw").value.trim();
+  var u = null;
+  for (var i = 0; i < users.length; i++) {
+    if (users[i].email.toLowerCase() === e && users[i].pass === p) {
+      u = users[i]; break;
+    }
+  }
+  if (!u) {
+    document.getElementById("err").style.display = "block";
+    return;
+  }
+  document.getElementById("err").style.display = "none";
+  document.getElementById("uname").textContent = u.name;
+  document.getElementById("wtitle").textContent = "Welcome back, " + u.name + "!";
+  document.getElementById("wdisc").textContent = "Your pricing tier: " + u.tier + " — " + u.disc;
+  document.getElementById("login-box").style.display = "none";
+  document.getElementById("portal").style.display = "block";
+}
+
+function logout() {
+  document.getElementById("em").value = "";
+  document.getElementById("pw").value = "";
+  document.getElementById("login-box").style.display = "grid";
+  document.getElementById("portal").style.display = "none";
+}
+
+document.getElementById("em").addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+document.getElementById("pw").addEventListener("keydown", function(e){ if(e.key==="Enter") doLogin(); });
+</script>
+</body>
+</html>
