@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Delany Products — Customer Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#0a1f3c;--steel:#1e3a5f;--accent:#2e7bcc;--light:#e8f1fa;
+  --font:'Segoe UI',system-ui,sans-serif;
+}
+body{font-family:var(--font);background:#f4f6f9;color:#1a1a2e;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--navy);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+.nav-logo{display:flex;align-items:center;gap:10px}
+.nav-logo-icon{width:36px;height:36px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.nav-logo-text{color:#fff;font-size:15px;font-weight:600}
+.nav-logo-sub{color:#8aaed4;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.nav-right{display:flex;align-items:center;gap:1rem}
+.nav-user{color:#8aaed4;font-size:13px}
+.nav-user span{color:#fff;font-weight:500}
+.btn-signout{background:transparent;color:#8aaed4;border:1px solid rgba(138,174,212,0.3);padding:6px 14px;border-radius:6px;font-size:12px;cursor:pointer;font-family:var(--font)}
+.btn-signout:hover{color:#fff;border-color:rgba(255,255,255,0.3)}
+
+/* PAGES */
+.page{display:none}
+.page.active{display:block}
+
+/* LOGIN */
+.login-wrap{min-height:calc(100vh - 60px);display:flex;align-items:center;justify-content:center;padding:2rem;background:#f4f6f9}
+.login-box{background:#fff;border-radius:16px;border:1px solid #e2e8f0;padding:2.5rem;width:100%;max-width:420px}
+.login-logo{text-align:center;margin-bottom:2rem}
+.login-icon{width:56px;height:56px;background:var(--navy);border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:#fff;margin-bottom:12px}
+.login-title{font-size:20px;font-weight:600;color:var(--navy)}
+.login-sub{font-size:13px;color:#64748b;margin-top:4px}
+.form-group{margin-bottom:16px}
+.form-label{display:block;font-size:12px;font-weight:500;color:#475569;margin-bottom:6px}
+.form-input{width:100%;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:14px;font-family:var(--font);color:#1a1a2e;background:#fff;transition:border-color 0.2s}
+.form-input:focus{outline:none;border-color:var(--accent)}
+.form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.form-remember{font-size:12px;color:#64748b;display:flex;align-items:center;gap:6px;cursor:pointer}
+.form-forgot{font-size:12px;color:var(--accent);cursor:pointer}
+.btn-login{width:100%;padding:12px;background:var(--navy);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background 0.2s}
+.btn-login:hover{background:var(--steel)}
+.login-error{background:#fef2f2;border:1px solid #fecaca;color:#dc2626;border-radius:8px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+.login-note{text-align:center;margin-top:16px;font-size:12px;color:#94a3b8}
+
+/* PORTAL LAYOUT */
+.portal-wrap{display:flex;min-height:calc(100vh - 60px)}
+.sidebar{width:220px;background:#fff;border-right:1px solid #e2e8f0;padding:1.5rem 0;flex-shrink:0}
+.sidebar-section{padding:0 1rem;margin-bottom:0.5rem}
+.sidebar-label{font-size:10px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;padding:0 0.75rem;margin-bottom:6px}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;font-size:13px;font-weight:400;color:#475569;cursor:pointer;transition:all 0.15s;margin-bottom:2px}
+.sidebar-link:hover{background:#f1f5f9;color:var(--navy)}
+.sidebar-link.active{background:var(--light);color:var(--accent);font-weight:500}
+.sidebar-icon{font-size:15px;width:20px;text-align:center}
+.sidebar-divider{border:none;border-top:1px solid #f1f5f9;margin:0.75rem 1rem}
+.portal-main{flex:1;padding:2rem;overflow-x:auto}
+
+/* DASHBOARD */
+.page-header{margin-bottom:1.5rem}
+.page-title{font-size:20px;font-weight:600;color:var(--navy)}
+.page-sub{font-size:13px;color:#64748b;margin-top:3px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.metric-card{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1.25rem}
+.metric-label{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px}
+.metric-val{font-size:22px;font-weight:600;color:var(--navy)}
+.metric-sub{font-size:12px;color:#64748b;margin-top:4px}
+
+/* PRODUCTS */
+.toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;gap:1rem;flex-wrap:wrap}
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;flex:1;max-width:320px}
+.search-box input{border:none;outline:none;font-size:13px;font-family:var(--font);color:#1a1a2e;width:100%;background:transparent}
+.filter-tabs{display:flex;gap:4px;background:#f1f5f9;border-radius:8px;padding:4px}
+.filter-tab{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:400;cursor:pointer;border:none;background:transparent;color:#64748b;font-family:var(--font);transition:all 0.15s}
+.filter-tab.active{background:#fff;color:var(--navy);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.products-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden}
+.products-table th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9;background:#fafafa}
+.products-table td{padding:12px 16px;border-bottom:1px solid #f8fafc;font-size:13px;color:#334155;vertical-align:middle}
+.products-table tr:last-child td{border-bottom:none}
+.products-table tr:hover td{background:#f8fafc}
+.sku-badge{font-family:monospace;font-size:11px;background:#f1f5f9;color:#475569;padding:2px 7px;border-radius:4px}
+.price-list{color:#64748b}
+.price-net{color:#059669;font-weight:600}
+.price-fixed{color:#2e7bcc;font-weight:600}
+.stock-badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+.stock-in{background:#dcfce7;color:#166534}
+.stock-low{background:#fef9c3;color:#854d0e}
+.stock-out{background:#fee2e2;color:#991b1b}
+.btn-add-cart{background:var(--navy);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font);transition:background 0.2s}
+.btn-add-cart:hover{background:var(--accent)}
+.btn-add-cart:disabled{background:#cbd5e1;cursor:not-allowed}
+
+/* CART */
+.cart-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden;margin-bottom:1.5rem}
+.cart-table th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9;background:#fafafa}
+.cart-table td{padding:12px 16px;border-bottom:1px solid #f8fafc;font-size:13px;color:#334155;vertical-align:middle}
+.cart-table tr:last-child td{border-bottom:none}
+.qty-input{width:60px;padding:5px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:13px;text-align:center;font-family:var(--font)}
+.btn-remove{background:transparent;border:none;color:#dc2626;font-size:13px;cursor:pointer;padding:4px 8px;border-radius:4px}
+.btn-remove:hover{background:#fee2e2}
+.cart-summary{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:1.5rem;max-width:360px;margin-left:auto}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;color:#475569;padding:6px 0;border-bottom:1px solid #f1f5f9}
+.summary-row:last-of-type{border-bottom:none}
+.summary-total{display:flex;justify-content:space-between;font-size:15px;font-weight:600;color:var(--navy);padding-top:12px;margin-top:4px;border-top:2px solid #e2e8f0}
+.btn-order{width:100%;padding:12px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;font-family:var(--font);margin-top:16px;transition:background 0.2s}
+.btn-order:hover{background:#2568b0}
+.empty-cart{text-align:center;padding:3rem;color:#94a3b8;font-size:14px}
+
+/* ORDERS */
+.orders-table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;border:1px solid #e2e8f0;overflow:hidden}
+.orders-table th{text-align:left;padding:11px 16px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9;background:#fafafa}
+.orders-table td{padding:12px 16px;border-bottom:1px solid #f8fafc;font-size:13px;color:#334155}
+.orders-table tr:last-child td{border-bottom:none}
+.orders-table tr:hover td{background:#f8fafc}
+.order-status{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:20px}
+.status-processing{background:#fef9c3;color:#854d0e}
+.status-shipped{background:#dbeafe;color:#1e40af}
+.status-delivered{background:#dcfce7;color:#166534}
+
+/* SUCCESS */
+.success-box{text-align:center;padding:3rem 2rem;background:#fff;border-radius:12px;border:1px solid #e2e8f0;max-width:480px;margin:0 auto}
+.success-icon{width:64px;height:64px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;font-size:28px}
+.success-title{font-size:20px;font-weight:600;color:var(--navy);margin-bottom:8px}
+.success-sub{font-size:14px;color:#64748b;line-height:1.6;margin-bottom:1.5rem}
+.btn-continue{background:var(--navy);color:#fff;border:none;border-radius:8px;padding:11px 24px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font)}
+
+/* ADMIN */
+.admin-section{background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem;margin-bottom:1.5rem}
+.admin-section-title{font-size:15px;font-weight:600;color:var(--navy);margin-bottom:1rem;padding-bottom:10px;border-bottom:1px solid #f1f5f9}
+.customer-table{width:100%;border-collapse:collapse}
+.customer-table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9}
+.customer-table td{padding:10px 12px;border-bottom:1px solid #f8fafc;font-size:13px;color:#334155}
+.customer-table tr:last-child td{border-bottom:none}
+.tier-badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 9px;border-radius:20px}
+.tier-a{background:#dbeafe;color:#1e40af}
+.tier-b{background:#dcfce7;color:#166534}
+.tier-c{background:#fef9c3;color:#854d0e}
+.btn-sm{background:var(--navy);color:#fff;border:none;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--font)}
+.add-form{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:end;margin-top:1rem}
+.add-form input,.add-form select{width:100%;padding:8px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;font-family:var(--font);color:#1a1a2e}
+.btn-add-customer{background:var(--accent);color:#fff;border:none;border-radius:7px;padding:9px 16px;font-size:13px;font-weight:500;cursor:pointer;font-family:var(--font);white-space:nowrap}
+.orders-admin-table{width:100%;border-collapse:collapse}
+.orders-admin-table th{text-align:left;padding:9px 12px;font-size:11px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:0.5px;border-bottom:1px solid #f1f5f9}
+.orders-admin-table td{padding:10px 12px;border-bottom:1px solid #f8fafc;font-size:13px;color:#334155;vertical-align:top}
+.order-items-list{font-size:11px;color:#64748b;margin-top:3px}
+select.status-select{border:1px solid #e2e8f0;border-radius:5px;padding:3px 6px;font-size:12px;font-family:var(--font);background:#fff}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .sidebar{display:none}
+  .metrics{grid-template-columns:1fr 1fr}
+  .add-form{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">D</div>
+    <div>
+      <div class="nav-logo-text">Delany Products</div>
+      <div class="nav-logo-sub">Customer Portal</div>
+    </div>
+  </div>
+  <div class="nav-right" id="nav-right" style="display:none">
+    <div class="nav-user">Logged in as: <span id="nav-username"></span></div>
+    <button class="btn-signout" onclick="signOut()">Sign Out</button>
+  </div>
+</nav>
+
+<!-- LOGIN PAGE -->
+<div class="page active" id="page-login">
+  <div class="login-wrap">
+    <div class="login-box">
+      <div class="login-logo">
+        <div class="login-icon">D</div>
+        <div class="login-title">Customer Portal</div>
+        <div class="login-sub">Sign in to view your pricing and place orders</div>
+      </div>
+      <div class="login-error" id="login-error">Incorrect email or password. Please try again.</div>
+      <div class="form-group">
+        <label class="form-label">Email Address</label>
+        <input class="form-input" type="email" id="login-email" placeholder="you@company.com" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input class="form-input" type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <div class="form-row">
+        <label class="form-remember"><input type="checkbox" id="remember-me"> Remember me</label>
+        <span class="form-forgot">Forgot password?</span>
+      </div>
+      <button class="btn-login" onclick="doLogin()">Sign In</button>
+      <div class="login-note">Need an account? Contact us at orders@delanyproducts.com</div>
+    </div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div class="page" id="page-portal">
+  <div class="portal-wrap">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Menu</div>
+        <div class="sidebar-link active" onclick="showSection('dashboard')" id="nav-dashboard">
+          <span class="sidebar-icon">&#9632;</span> Dashboard
+        </div>
+        <div class="sidebar-link" onclick="showSection('products')" id="nav-products">
+          <span class="sidebar-icon">&#9642;</span> Product Catalog
+        </div>
+        <div class="sidebar-link" onclick="showSection('cart')" id="nav-cart">
+          <span class="sidebar-icon">&#9633;</span> My Cart <span id="cart-count-badge" style="display:none;background:#2e7bcc;color:#fff;font-size:10px;padding:1px 6px;border-radius:10px;margin-left:4px">0</span>
+        </div>
+        <div class="sidebar-link" onclick="showSection('orders')" id="nav-orders">
+          <span class="sidebar-icon">&#9675;</span> My Orders
+        </div>
+      </div>
+      <hr class="sidebar-divider">
+      <div class="sidebar-section" id="admin-nav" style="display:none">
+        <div class="sidebar-label">Admin</div>
+        <div class="sidebar-link" onclick="showSection('admin')" id="nav-admin">
+          <span class="sidebar-icon">&#9670;</span> Manage Portal
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN -->
+    <div class="portal-main">
+
+      <!-- DASHBOARD -->
+      <div id="section-dashboard">
+        <div class="page-header">
+          <div class="page-title" id="dash-welcome">Welcome back</div>
+          <div class="page-sub">Here's a summary of your account</div>
+        </div>
+        <div class="metrics">
+          <div class="metric-card">
+            <div class="metric-label">Your discount tier</div>
+            <div class="metric-val" id="dash-tier">—</div>
+            <div class="metric-sub" id="dash-discount">—</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Orders this year</div>
+            <div class="metric-val" id="dash-order-count">—</div>
+            <div class="metric-sub">Total orders placed</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Items in cart</div>
+            <div class="metric-val" id="dash-cart-count">0</div>
+            <div class="metric-sub"><span style="color:#2e7bcc;cursor:pointer" onclick="showSection('cart')">View cart →</span></div>
+          </div>
+        </div>
+        <div style="background:#fff;border-radius:12px;border:1px solid #e2e8f0;padding:1.5rem">
+          <div style="font-size:14px;font-weight:600;color:#0a1f3c;margin-bottom:12px">Quick actions</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn-add-cart" onclick="showSection('products')">Browse catalog</button>
+            <button class="btn-add-cart" style="background:#059669" onclick="showSection('orders')">View my orders</button>
+            <button class="btn-add-cart" style="background:#7c3aed" onclick="showSection('cart')">Go to cart</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRODUCTS -->
+      <div id="section-products" style="display:none">
+        <div class="page-header">
+          <div class="page-title">Product Catalog</div>
+          <div class="page-sub" id="products-sub">Browse our full catalog — your net prices are shown below</div>
+        </div>
+        <div class="toolbar">
+          <div class="search-box">
+            <span style="color:#94a3b8;font-size:14px">&#128269;</span>
+            <input type="text" placeholder="Search by name or SKU..." id="product-search" oninput="filterProducts()" />
+          </div>
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="setFilter('All',this)">All</button>
+            <button class="filter-tab" onclick="setFilter('Manual',this)">Manual</button>
+            <button class="filter-tab" onclick="setFilter('Sensor',this)">Sensor</button>
+            <button class="filter-tab" onclick="setFilter('TruStop',this)">TruStop</button>
+            <button class="filter-tab" onclick="setFilter('Parts',this)">Parts</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="products-table" id="products-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>SKU</th>
+                <th>Description</th>
+                <th>List Price</th>
+                <th>Your Net Price</th>
+                <th>Stock</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="products-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CART -->
+      <div id="section-cart" style="display:none">
+        <div class="page-header">
+          <div class="page-title">My Cart</div>
+          <div class="page-sub">Review your items and place your order</div>
+        </div>
+        <div id="cart-empty" class="empty-cart" style="display:none">
+          <div style="font-size:32px;margin-bottom:12px">&#128722;</div>
+          Your cart is empty. <span style="color:#2e7bcc;cursor:pointer" onclick="showSection('products')">Browse the catalog →</span>
+        </div>
+        <div id="cart-content">
+          <table class="cart-table" id="cart-table">
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>SKU</th>
+                <th>Unit Price</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="cart-tbody"></tbody>
+          </table>
+          <div style="display:flex;justify-content:flex-end">
+            <div class="cart-summary">
+              <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">$0.00</span></div>
+              <div class="summary-row"><span>Shipping</span><span>Calculated at invoice</span></div>
+              <div class="summary-total"><span>Total</span><span id="cart-total">$0.00</span></div>
+              <button class="btn-order" onclick="placeOrder()">Place Order</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDERS -->
+      <div id="section-orders" style="display:none">
+        <div class="page-header">
+          <div class="page-title">My Orders</div>
+          <div class="page-sub">View your order history and status</div>
+        </div>
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order #</th>
+              <th>Date</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="orders-tbody"></tbody>
+        </table>
+      </div>
+
+      <!-- ORDER SUCCESS -->
+      <div id="section-success" style="display:none">
+        <div class="success-box">
+          <div class="success-icon">&#10003;</div>
+          <div class="success-title">Order Placed Successfully!</div>
+          <div class="success-sub">Your order has been received and our team at Delany Products will begin processing it shortly. You'll receive a confirmation and shipping updates by email.</div>
+          <div style="background:#f8fafc;border-radius:8px;padding:14px;margin-bottom:1.5rem;font-size:13px;color:#475569">
+            Order #: <strong id="success-order-num"></strong><br>
+            Placed by: <strong id="success-customer"></strong><br>
+            Date: <strong id="success-date"></strong>
+          </div>
+          <button class="btn-continue" onclick="showSection('orders')">View My Orders</button>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="section-admin" style="display:none">
+        <div class="page-header">
+          <div class="page-title">Portal Admin</div>
+          <div class="page-sub">Manage customers, pricing, and incoming orders</div>
+        </div>
+
+        <!-- Incoming Orders -->
+        <div class="admin-section">
+          <div class="admin-section-title">Incoming Orders</div>
+          <table class="orders-admin-table">
+            <thead>
+              <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Date</th>
+                <th>Items</th>
+                <th>Total</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="admin-orders-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Customers -->
+        <div class="admin-section">
+          <div class="admin-section-title">Customer Accounts</div>
+          <table class="customer-table" id="customer-table">
+            <thead>
+              <tr>
+                <th>Company</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Pricing Tier</th>
+                <th>Discount / Type</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="customer-tbody"></tbody>
+          </table>
+          <div class="add-form">
+            <input type="text" id="new-company" placeholder="Company name" />
+            <input type="email" id="new-email" placeholder="Email" />
+            <input type="text" id="new-pass" placeholder="Password" />
+            <select id="new-tier">
+              <option value="A">Tier A — 35% off list</option>
+              <option value="B">Tier B — 25% off list</option>
+              <option value="C">Tier C — 15% off list</option>
+              <option value="FIXED">Fixed prices</option>
+            </select>
+            <button class="btn-add-customer" onclick="addCustomer()">+ Add Customer</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+var DB = {
+  customers: [
+    {id:1,company:"Delany Admin",email:"admin@delanyproducts.com",pass:"admin2024",tier:"ADMIN",discount:0},
+    {id:2,company:"ABC Plumbing Supply",email:"abc@abcplumbing.com",pass:"abc123",tier:"A",discount:35},
+    {id:3,company:"Metro Commercial",email:"orders@metrocommercial.com",pass:"metro456",tier:"B",discount:25},
+    {id:4,company:"City Contractors Inc",email:"purchasing@citycontractors.com",pass:"city789",tier:"C",discount:15},
+    {id:5,company:"Allied Trade Partners",email:"info@alliedtrade.com",pass:"allied321",tier:"FIXED",discount:0,fixedPrices:{"TE-1001-CP":140,"TS-2200-SS":115,"SB-3100-CP":88,"DM-0055-KT":13,"VB-0120-AS":10}}
+  ],
+  products: [
+    {id:1,name:"TruEdge Sensor Flushometer",sku:"TE-1001-CP",cat:"Sensor",desc:"State-of-the-art hands-free sensor valve with TruStop and Mashaerator technology",listPrice:248,stock:"In Stock"},
+    {id:2,name:"TruStop Flush Valve",sku:"TS-2200-SS",cat:"TruStop",desc:"Patented ball valve design reducing maintenance cost for institutional water closets",listPrice:189,stock:"In Stock"},
+    {id:3,name:"Saber Manual Flushometer",sku:"SB-3100-CP",cat:"Manual",desc:"Industry-leading manual flush valve with replaceable main valve seat",listPrice:142,stock:"In Stock"},
+    {id:4,name:"Diaphragm w/ Mashaerator",sku:"DM-0055-KT",cat:"Parts",desc:"Self-cleaning bypass diaphragm with stainless steel Mashaerator wire loop",listPrice:24.50,stock:"In Stock"},
+    {id:5,name:"Vacuum Breaker Assembly",sku:"VB-0120-AS",cat:"Parts",desc:"Chloramine-resistant vacuum breaker, fits all Delany models",listPrice:18,stock:"Low Stock"},
+    {id:6,name:"Rubberflex Handle Assembly",sku:"HA-0315-RF",cat:"Parts",desc:"ADA compliant, chloramine-resistant, leak-free handle assembly",listPrice:31,stock:"In Stock"},
+    {id:7,name:"SlipFit Joint Connection Kit",sku:"SF-0210-KT",cat:"Parts",desc:"Connects Saber to any existing slip joint stop in the field",listPrice:22,stock:"In Stock"},
+    {id:8,name:"TruEdge Sensor Faucet",sku:"TE-2001-SF",cat:"Sensor",desc:"Hands-free sensor faucet, pairs with TruEdge flush valve line",listPrice:195,stock:"In Stock"},
+    {id:9,name:"Saber Urinal Valve",sku:"SB-4100-UV",cat:"Manual",desc:"Manual urinal flush valve with upper chamber regulator",listPrice:128,stock:"In Stock"},
+    {id:10,name:"Main Valve Seat Replacement",sku:"VS-0088-MV",cat:"Parts",desc:"Only replaceable main valve seat on the market — prevents wire drawing",listPrice:14.75,stock:"Low Stock"}
+  ],
+  orders: [
+    {id:"ORD-20791",customerId:2,date:"2026-03-08",items:[{sku:"DM-0055-KT",name:"Diaphragm w/ Mashaerator",qty:10,unitPrice:15.93},{sku:"HA-0315-RF",name:"Rubberflex Handle Assembly",qty:5,unitPrice:20.15}],total:209.05,status:"Delivered"},
+    {id:"ORD-20734",customerId:2,date:"2026-02-28",items:[{sku:"SB-3100-CP",name:"Saber Manual Flushometer",qty:6,unitPrice:92.30}],total:553.80,status:"Delivered"},
+    {id:"ORD-20810",customerId:3,date:"2026-03-12",items:[{sku:"TE-1001-CP",name:"TruEdge Sensor Flushometer",qty:2,unitPrice:186}],total:372,status:"Shipped"},
+    {id:"ORD-20825",customerId:4,date:"2026-03-15",items:[{sku:"TS-2200-SS",name:"TruStop Flush Valve",qty:4,unitPrice:160.65}],total:642.60,status:"Processing"}
+  ],
+  cart: [],
+  currentUser: null,
+  nextOrderId: 20840
+};
+
+function getNetPrice(user, product) {
+  if (user.tier === "FIXED" && user.fixedPrices && user.fixedPrices[product.sku] !== undefined) {
+    return user.fixedPrices[product.sku];
+  }
+  if (user.tier === "ADMIN") return product.listPrice;
+  return parseFloat((product.listPrice * (1 - user.discount / 100)).toFixed(2));
+}
+
+function fmt(n) { return "$" + parseFloat(n).toFixed(2); }
+
+function doLogin() {
+  var email = document.getElementById("login-email").value.trim().toLowerCase();
+  var pass = document.getElementById("login-pass").value;
+  var user = DB.customers.find(c => c.email.toLowerCase() === email && c.pass === pass);
+  if (!user) {
+    document.getElementById("login-error").style.display = "block";
+    return;
+  }
+  DB.currentUser = user;
+  document.getElementById("login-error").style.display = "none";
+  document.getElementById("nav-username").textContent = user.company;
+  document.getElementById("nav-right").style.display = "flex";
+  if (user.tier === "ADMIN") document.getElementById("admin-nav").style.display = "block";
+  document.getElementById("page-login").classList.remove("active");
+  document.getElementById("page-portal").classList.add("active");
+  loadDashboard();
+  showSection("dashboard");
+}
+
+function signOut() {
+  DB.currentUser = null; DB.cart = [];
+  document.getElementById("nav-right").style.display = "none";
+  document.getElementById("admin-nav").style.display = "none";
+  document.getElementById("page-portal").classList.remove("active");
+  document.getElementById("page-login").classList.add("active");
+  document.getElementById("login-email").value = "";
+  document.getElementById("login-pass").value = "";
+}
+
+function showSection(name) {
+  ["dashboard","products","cart","orders","success","admin"].forEach(s => {
+    document.getElementById("section-"+s).style.display = s === name ? "" : "none";
+  });
+  ["dashboard","products","cart","orders","admin"].forEach(s => {
+    var el = document.getElementById("nav-"+s);
+    if (el) el.classList.toggle("active", s === name);
+  });
+  if (name === "products") renderProducts();
+  if (name === "cart") renderCart();
+  if (name === "orders") renderOrders();
+  if (name === "admin") renderAdmin();
+}
+
+function loadDashboard() {
+  var u = DB.currentUser;
+  document.getElementById("dash-welcome").textContent = "Welcome back, " + u.company;
+  document.getElementById("dash-tier").textContent = u.tier === "ADMIN" ? "Admin" : "Tier " + u.tier;
+  document.getElementById("dash-discount").textContent = u.tier === "FIXED" ? "Fixed net prices" : u.tier === "ADMIN" ? "Full access" : u.discount + "% off list price";
+  var myOrders = DB.orders.filter(o => o.customerId === u.id);
+  document.getElementById("dash-order-count").textContent = myOrders.length;
+  updateCartBadge();
+}
+
+var currentFilter = "All";
+function setFilter(f, btn) {
+  currentFilter = f;
+  btn.closest(".filter-tabs").querySelectorAll(".filter-tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  renderProducts();
+}
+function filterProducts() { renderProducts(); }
+
+function renderProducts() {
+  var u = DB.currentUser;
+  var search = document.getElementById("product-search").value.toLowerCase();
+  var tbody = document.getElementById("products-tbody");
+  tbody.innerHTML = "";
+  var filtered = DB.products.filter(p => {
+    var matchCat = currentFilter === "All" || p.cat === currentFilter;
+    var matchSearch = !search || p.name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search);
+    return matchCat && matchSearch;
+  });
+  filtered.forEach(p => {
+    var net = getNetPrice(u, p);
+    var priceClass = u.tier === "FIXED" ? "price-fixed" : "price-net";
+    var stockClass = p.stock === "In Stock" ? "stock-in" : p.stock === "Low Stock" ? "stock-low" : "stock-out";
+    var disabled = p.stock === "Out of Stock" ? "disabled" : "";
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:500;color:#0a1f3c">'+p.name+'</td>' +
+      '<td><span class="sku-badge">'+p.sku+'</span></td>' +
+      '<td style="max-width:200px;color:#64748b;font-size:12px">'+p.desc+'</td>' +
+      '<td class="price-list">'+fmt(p.listPrice)+'</td>' +
+      '<td class="'+priceClass+'">'+fmt(net)+'</td>' +
+      '<td><span class="stock-badge '+stockClass+'">'+p.stock+'</span></td>' +
+      '<td><button class="btn-add-cart" '+disabled+' onclick="addToCart('+p.id+')">Add to cart</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function addToCart(productId) {
+  var p = DB.products.find(x => x.id === productId);
+  var existing = DB.cart.find(x => x.productId === productId);
+  if (existing) { existing.qty++; }
+  else { DB.cart.push({productId: productId, qty: 1}); }
+  updateCartBadge();
+}
+
+function updateCartBadge() {
+  var total = DB.cart.reduce((s, x) => s + x.qty, 0);
+  var badge = document.getElementById("cart-count-badge");
+  badge.textContent = total;
+  badge.style.display = total > 0 ? "inline" : "none";
+  document.getElementById("dash-cart-count").textContent = total;
+}
+
+function renderCart() {
+  var u = DB.currentUser;
+  var tbody = document.getElementById("cart-tbody");
+  tbody.innerHTML = "";
+  if (DB.cart.length === 0) {
+    document.getElementById("cart-empty").style.display = "";
+    document.getElementById("cart-content").style.display = "none";
+    return;
+  }
+  document.getElementById("cart-empty").style.display = "none";
+  document.getElementById("cart-content").style.display = "";
+  var subtotal = 0;
+  DB.cart.forEach((item, idx) => {
+    var p = DB.products.find(x => x.id === item.productId);
+    var net = getNetPrice(u, p);
+    var sub = net * item.qty;
+    subtotal += sub;
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:500;color:#0a1f3c">'+p.name+'</td>' +
+      '<td><span class="sku-badge">'+p.sku+'</span></td>' +
+      '<td>'+fmt(net)+'</td>' +
+      '<td><input class="qty-input" type="number" min="1" value="'+item.qty+'" onchange="updateQty('+idx+',this.value)" /></td>' +
+      '<td style="font-weight:500">'+fmt(sub)+'</td>' +
+      '<td><button class="btn-remove" onclick="removeFromCart('+idx+')">Remove</button></td>';
+    tbody.appendChild(tr);
+  });
+  document.getElementById("cart-subtotal").textContent = fmt(subtotal);
+  document.getElementById("cart-total").textContent = fmt(subtotal);
+}
+
+function updateQty(idx, val) {
+  DB.cart[idx].qty = Math.max(1, parseInt(val) || 1);
+  renderCart();
+  updateCartBadge();
+}
+
+function removeFromCart(idx) {
+  DB.cart.splice(idx, 1);
+  renderCart();
+  updateCartBadge();
+}
+
+function placeOrder() {
+  var u = DB.currentUser;
+  var items = DB.cart.map(item => {
+    var p = DB.products.find(x => x.id === item.productId);
+    var net = getNetPrice(u, p);
+    return {sku: p.sku, name: p.name, qty: item.qty, unitPrice: net};
+  });
+  var total = items.reduce((s, x) => s + x.qty * x.unitPrice, 0);
+  var orderId = "ORD-" + DB.nextOrderId++;
+  var today = new Date().toISOString().slice(0,10);
+  DB.orders.unshift({id: orderId, customerId: u.id, date: today, items: items, total: parseFloat(total.toFixed(2)), status: "Processing"});
+  DB.cart = [];
+  updateCartBadge();
+  document.getElementById("success-order-num").textContent = orderId;
+  document.getElementById("success-customer").textContent = u.company;
+  document.getElementById("success-date").textContent = today;
+  showSection("success");
+}
+
+function renderOrders() {
+  var u = DB.currentUser;
+  var tbody = document.getElementById("orders-tbody");
+  tbody.innerHTML = "";
+  var myOrders = u.tier === "ADMIN" ? DB.orders : DB.orders.filter(o => o.customerId === u.id);
+  if (myOrders.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:2rem;color:#94a3b8">No orders yet</td></tr>';
+    return;
+  }
+  myOrders.forEach(o => {
+    var sc = o.status === "Processing" ? "status-processing" : o.status === "Shipped" ? "status-shipped" : "status-delivered";
+    var itemsSummary = o.items.map(i => i.name + " x"+i.qty).join(", ");
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:500;color:#2e7bcc">'+o.id+'</td>' +
+      '<td>'+o.date+'</td>' +
+      '<td style="max-width:220px;font-size:12px;color:#475569">'+itemsSummary+'</td>' +
+      '<td style="font-weight:500">'+fmt(o.total)+'</td>' +
+      '<td><span class="order-status '+sc+'">'+o.status+'</span></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function renderAdmin() {
+  renderAdminOrders();
+  renderCustomerTable();
+}
+
+function renderAdminOrders() {
+  var tbody = document.getElementById("admin-orders-tbody");
+  tbody.innerHTML = "";
+  DB.orders.forEach(o => {
+    var cust = DB.customers.find(c => c.id === o.customerId);
+    var itemsList = o.items.map(i => i.sku + " x"+i.qty).join(", ");
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:500;color:#2e7bcc">'+o.id+'</td>' +
+      '<td>'+( cust ? cust.company : "Unknown")+'</td>' +
+      '<td>'+o.date+'</td>' +
+      '<td style="font-size:12px;color:#475569">'+itemsList+'</td>' +
+      '<td style="font-weight:500">'+fmt(o.total)+'</td>' +
+      '<td><select class="status-select" onchange="updateOrderStatus(\''+o.id+'\',this.value)">' +
+        ['Processing','Shipped','Delivered'].map(s => '<option'+(o.status===s?' selected':'')+'>'+s+'</option>').join('') +
+      '</select></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function updateOrderStatus(orderId, status) {
+  var o = DB.orders.find(x => x.id === orderId);
+  if (o) o.status = status;
+}
+
+function renderCustomerTable() {
+  var tbody = document.getElementById("customer-tbody");
+  tbody.innerHTML = "";
+  DB.customers.filter(c => c.tier !== "ADMIN").forEach(c => {
+    var tierClass = c.tier === "A" ? "tier-a" : c.tier === "B" ? "tier-b" : "tier-c";
+    var discStr = c.tier === "FIXED" ? "Fixed prices" : c.discount + "% off list";
+    var tr = document.createElement("tr");
+    tr.innerHTML = '<td style="font-weight:500">'+c.company+'</td>' +
+      '<td>'+c.email+'</td>' +
+      '<td style="font-family:monospace;font-size:12px">'+c.pass+'</td>' +
+      '<td><span class="tier-badge '+tierClass+'">Tier '+c.tier+'</span></td>' +
+      '<td>'+discStr+'</td>' +
+      '<td><button class="btn-sm" onclick="removeCustomer('+c.id+')">Remove</button></td>';
+    tbody.appendChild(tr);
+  });
+}
+
+function addCustomer() {
+  var company = document.getElementById("new-company").value.trim();
+  var email = document.getElementById("new-email").value.trim();
+  var pass = document.getElementById("new-pass").value.trim();
+  var tier = document.getElementById("new-tier").value;
+  if (!company || !email || !pass) { alert("Please fill in all fields"); return; }
+  var discounts = {A:35,B:25,C:15,FIXED:0};
+  var newId = Math.max(...DB.customers.map(c=>c.id)) + 1;
+  DB.customers.push({id:newId,company:company,email:email,pass:pass,tier:tier,discount:discounts[tier]});
+  document.getElementById("new-company").value = "";
+  document.getElementById("new-email").value = "";
+  document.getElementById("new-pass").value = "";
+  renderCustomerTable();
+}
+
+function removeCustomer(id) {
+  if (!confirm("Remove this customer?")) return;
+  DB.customers = DB.customers.filter(c => c.id !== id);
+  renderCustomerTable();
+}
+</script>
+</body>
+</html>
